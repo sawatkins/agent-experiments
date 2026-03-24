@@ -1,0 +1,16 @@
+{
+  "name": "agent-experiments",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "tsx run-agent.ts"
+  },
+  "dependencies": {
+    "@openai/agents": "latest",
+    "zod": "latest"
+  },
+  "devDependencies": {
+    "tsx": "latest",
+    "typescript": "latest"
+  }
+}
