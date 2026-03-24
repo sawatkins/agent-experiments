@@ -10,7 +10,43 @@ const getPages = tool({
     query: z.string()
   }),
   execute: async (input: {query: string}) => {
-    // TODO: Unimplemented
+    const response = await fetch("https://blogsearch.io/api/search?" + new URLSearchParams({
+      q: input.query,
+      page: "1",
+    }));
+
+    if (!response.ok) {
+      throw new Error(`blogsearch.io search failed with status ${response.status}`);
+    }
+
+    const data = await response.json() as {
+      results?: Array<{
+        url?: string;
+        title?: string;
+        date?: string;
+        text?: string;
+      }>;
+      total?: number;
+      page?: number;
+      total_pages?: number;
+    };
+
+    if (!Array.isArray(data.results)) {
+      throw new Error("blogsearch.io search response did not include a results array");
+    }
+
+    return {
+      query: input.query,
+      total: typeof data.total === "number" ? data.total : data.results.length,
+      page: typeof data.page === "number" ? data.page : 1,
+      total_pages: typeof data.total_pages === "number" ? data.total_pages : 1,
+      results: data.results.map((result) => ({
+        url: result.url ?? "",
+        title: result.title ?? "",
+        date: result.date ?? "",
+        text: result.text ?? "",
+      })),
+    };
   },
 });
 interface BlogCorpusQaAgentContext {
@@ -90,6 +126,8 @@ export const runWorkflow = async (workflow: WorkflowInput) => {
     const blogCorpusQaAgentResult = {
       output_text: blogCorpusQaAgentResultTemp.finalOutput ?? ""
     };
+
+    return blogCorpusQaAgentResult;
   });
 }
 
